@@ -16,13 +16,19 @@ char loginUser(void){
 	char quit;
 	char answer[1];
 	char userType;				//user type will be read from the file after successful login, and is what is returned by this function
+	
+	char un[14];
+	char pw[14];
+	
+	/*
 	char *tokenUN;				//a pointer to the token of the fgets location of the file's text
 	char *tokenPW;
 	char *tokenUT;  //user type token
 	char un[12];
 	char pw[12];
 	char ut;
-	
+	char *tokens[3];
+	*/
 	int triesRemaining = 10;
 	
 	const char d[1] = "$";   //delimiter to separate username, password, and user type
@@ -42,36 +48,48 @@ char loginUser(void){
 		
 	
 		if(f != NULL){   //run this if the file exists
-		
+			
+
 			char userLoginInfo[40];   //stores each line of the user file, fgets is delimited by newline, and stores each input here
 		
 			while(!feof(f) && authenticated == 'n'){    //gets each line of text from the file until it reaches the end of the file
-				fgets(userLoginInfo, sizeof(userLoginInfo), f);
+			
+				fgets(userLoginInfo, sizeof(userLoginInfo)-1, f);
 				userLoginInfo[strcspn(userLoginInfo, "\n")] = '\0';
 				
 				printf("info \"%s\"\n", userLoginInfo);
 				
+				sscanf(userLoginInfo, "%[^$]$%[^$]$%c", un, pw, userType);
+				
+				
+				/*
 				tokenUN = strtok(userLoginInfo, d);  //reads to the first delimiter, should be the username
 				printf("name \"%s\"\n", tokenUN);
-				strncpy(un, tokenUN, strlen(&tokenUN));
+				strncpy(un, tokenUN, strlen(tokenUN)-1);
+				
 				tokenPW = strtok(NULL, d);          //reads password
 				printf("pass \"%s\"\n", tokenPW);
+				strncpy(pw, tokenPW, strlen(tokenPW)-1);
 				
 				tokenUT = strtok(NULL, d);
 				printf("type \"%s\"\n", tokenUT);		//reads user type
 				
-				printf("%s:%s   %s:%s\n", username, un, password, pw);
+				token = strtok(userLoginInfo, d);
+				tokens[0] = token;
+				*/
+				
+				printf("%s:%s   %s:%s   userType:%c\n", username, un, password, pw, userType);
 				
 				if(strcmp(username, un) == 0 && strcmp(password, pw) == 0){
 					printf("Access Granted\n");
-					printf("info after granted %s\n", userLoginInfo);
-					userType = tokenUT[0];			//user type is retrieved from the type token
+
 					printf("type after converted %c\n", userType);
 					authenticated = 'y';		//exits the login loop with this character
 				}
 				
 				printf("end of loop\n");
 			}
+			
 		}
 		else{  	//if the user file cant be found
 			printf("Cannot find critical data file, closing program...");
