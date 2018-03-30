@@ -1,75 +1,110 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 
-char loginUser(){
+#include "login.h"
+
+char loginUser(void){
 	
 	const int MAXNAMELENGTH = 12;  //length for the username and password
 	char username[MAXNAMELENGTH]; //will hold the username after found and separated
 	const int MAXPWLENGTH = 12;
 	char password[MAXPWLENGTH];  //same with password
 	
-	char authenticated = 'n';    //toggles to y if the username and password match an actual user
-	char quit = 'n';
+	char authenticated;    //toggles to y if the username and password match an actual user
+	char quit;
 	char answer[1];
 	char userType;				//user type will be read from the file after successful login, and is what is returned by this function
-	char *tokenUN;				//a pointer to the token of the fget location of the file's text
+	char *tokenUN;				//a pointer to the token of the fgets location of the file's text
 	char *tokenPW;
+	char *tokenUT;  //user type token
+	char un[12];
+	char pw[12];
+	char ut;
 	
 	int triesRemaining = 10;
 	
-	const char d = '$';   //delimiter to separate username, password, and user type
+	const char d[1] = "$";   //delimiter to separate username, password, and user type
 	FILE *f;				//points to the file stream
 	
-	f = fopen("c:\Users\danp9\desktop\userlist.txt");   //creates the file stream
+	f = fopen("userlist.txt", "r");   //creates the file stream
 	
 	//this is the main login loop, allows the user to try again
 	do{
+		authenticated = 'n';
+		quit = 'n';
 		
 		printf("Please enter your login information.\nUsername:\n");
-		scanf("%12[^\n]", username);			//scans the input from the command line, only reads the first 12 characters, delimited by a new line
-		printf("Password\n");
-		scanf("%12[^\n]", password);
+		scanf(" %12[^\n]s", username);			//scans the input from the command line, only reads the first 12 characters, delimited by a new line
+		printf("Password:\n");
+		scanf(" %12[^\n]s", password);
+		
 	
-		if(f != NULL){
+		if(f != NULL){   //run this if the file exists
 		
-			char userLoginInfo[26];   //stores each line of the user file, fgets is delimited by newline, and stores each input here
+			char userLoginInfo[40];   //stores each line of the user file, fgets is delimited by newline, and stores each input here
 		
-			while(fgets(userLoginInfo[26], sizeof(userLoginInfo), f) != NULL && authenticated != 'y'){
-				tokenUN = strtok(userLoginInfo, p);  //reads to the first delimiter, should be the username
-				tokenPW = strtok(NULL, p);
+			while(!feof(f) && authenticated == 'n'){    //gets each line of text from the file until it reaches the end of the file
+				fgets(userLoginInfo, sizeof(userLoginInfo), f);
+				userLoginInfo[strcspn(userLoginInfo, "\n")] = '\0';
 				
-				if(&tokenUN.strcmp(username) && &tokenPW.strcmp(password){
-					
+				printf("info \"%s\"\n", userLoginInfo);
+				
+				tokenUN = strtok(userLoginInfo, d);  //reads to the first delimiter, should be the username
+				printf("name \"%s\"\n", tokenUN);
+				strncpy(un, tokenUN, strlen(&tokenUN));
+				tokenPW = strtok(NULL, d);          //reads password
+				printf("pass \"%s\"\n", tokenPW);
+				
+				tokenUT = strtok(NULL, d);
+				printf("type \"%s\"\n", tokenUT);		//reads user type
+				
+				printf("%s:%s   %s:%s\n", username, un, password, pw);
+				
+				if(strcmp(username, un) == 0 && strcmp(password, pw) == 0){
 					printf("Access Granted\n");
-					
-					userType = &strtok(NULL, p)[0];
-					authenticated = 'y';
+					printf("info after granted %s\n", userLoginInfo);
+					userType = tokenUT[0];			//user type is retrieved from the type token
+					printf("type after converted %c\n", userType);
+					authenticated = 'y';		//exits the login loop with this character
 				}
-			}
-			if(authenticated = 'n'){
-				triesRemaining--;
-				printf("Username or Password was incorrect, tries remaining: %d\n", triesRemaining);
 				
-				while(quit != 'y' && quit != 'Y' && quit != 'n' && quit != 'N'){
-					printf("do you wish to try again?(y/n)");
-					scanf("%1[^\n]s", answer);   		//lets the user type as much as they want until they hit enter
-														//and truncates it to one char and puts it in a char variable
-					quit = answer[0];
-				}
+				printf("end of loop\n");
 			}
 		}
-		else{
+		else{  	//if the user file cant be found
 			printf("Cannot find critical data file, closing program...");
-			return 0;
+			exit(0);
 		}
+		
+		if(authenticated == 'n'){
+			triesRemaining--;			//decrements the number of tries if the username or password is incorrect
+			printf("Username or Password was incorrect, tries remaining: %d\n", triesRemaining);
+			
+			do{
+				printf("do you wish to try again?(y/n)");
+				scanf(" %1[^\n]s", answer);   		//lets the user type as much as they want until they hit enter
+													//and truncates it to one char and puts it in a char variable
+			}while(strcasecmp(answer, "y") && strcasecmp(answer, "n"));
+			
+			printf("%s\n", answer);
+			//translates the answer string to the quit character signal
+			if(strcasecmp(answer, "y") == 0){
+				quit = 'n';
+			}
+			if(strcasecmp(answer, "n") == 0){
+				quit = 'y';
+			}
+		}
+	}while(authenticated == 'n' && quit == 'n' && triesRemaining > 0);	//loops the login cycle if the input was incorrect, the user wants to try again, and there are tries remaining
 	
-	}while(authenticated == 'n' && quit == 'n');
-	
-	if(authenticated = 'y'){
+	if(authenticated == 'y'){
 		return userType;
 	}
 	else{
-		return NULL;
+		return 'q';
 	}
+	return 'q';
 }
 

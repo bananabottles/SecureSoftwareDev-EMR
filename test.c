@@ -1,10 +1,10 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#include<login.h>
+#include "login.c"
 
 
-int main(){
+int main(void){
 	
 	printf("Welcome to the Electronic Medical Record (EMR) System!\n");
 	char userType;  //the login function will return the user type so the user will be redirected to the correct menu
@@ -13,25 +13,31 @@ int main(){
 						//which would loop back to the login screen
 	do{
 		shutdown = 'y';
-		userType = NULL;
-		
-		userType = login();  //sends the user to the login screen and awaits the outcome
+		userType = 'q'; //q is the quit signal that will eexit the login loop to shutdown
 	
-		if(userType != NULL){
-			switch(userType){
-				case 'a':
-					//go to admin menu   shutdown = adminMenu();
-					break;
-				case 'e':
-					//go to EP menu    shutdown = epMenu();
-					break;
-				case 'p':
-					//go to patient menu	shutdown = patientMenu();
-					break;
-				default:
-					printf("Error redirecting after login, terminating program...");
-					return 0;
-			}
+		userType = loginUser();  //sends the user to the login screen and awaits the outcome
+	
+		switch(userType){
+			case 'a':
+				printf("Redirecting to admin menu\n");
+				//go to admin menu   shutdown = adminMenu();
+				break;
+			case 'e':
+				printf("Redirecting to ep menu\n");
+				//go to EP menu    shutdown = epMenu();
+				break;
+			case 'p':
+				printf("Redirecting to patient menu\n");
+				//go to patient menu	shutdown = patientMenu();
+				break;
+			case 'q':
+				printf("Exiting program...");
+				shutdown = 'y';
+				break;
+			default:
+				printf("Error redirecting after login, terminating program...");
+				shutdown = 'y';
+				break;
 		}
 	}while(shutdown != 'y');
 	return 0;
