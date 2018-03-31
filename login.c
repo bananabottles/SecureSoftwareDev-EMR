@@ -17,7 +17,7 @@ char loginUser(void){
 	char answer;
 	char userType;				//user type will be read from the file after successful login, and is what is returned by this function
 	
-	char un[MAXNAMELENGTH];
+	char un[MAXNAMELENGTH];    //used to store file data for comparison with user input
 	char pw[MAXPWLENGTH];
 	
 	int triesRemaining = 5;
@@ -29,7 +29,6 @@ char loginUser(void){
 	
 	//this is the main login loop, allows the user to try again
 	do{
-		printf("starting loop\n");
 		
 		f = fopen("user_list.txt", "r");   //creates the file stream
 		
